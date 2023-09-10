@@ -1,0 +1,99 @@
+.warning-section,
+.actions,
+.downloads-sections {
+    margin-top: 20px;
+}
+
+.options label {
+    justify-content: space-between;
+    display: block;
+    margin-bottom: 5px;
+    color: #ff4500;
+    /* A fire-red color */
+    padding-bottom: 2%;
+}
+
+.url,
+.filename,
+.destination {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ff4500;
+    /* A fire-red color */
+    border-radius: 5px;
+    color: #ff4500;
+}
+
+.options {
+    padding-top: 2%;
+    padding-bottom: 2%;
+    display: flex;
+}
+
+
+.btn {
+    padding: 10px 15px;
+    padding-top: 1%;
+    padding-bottom: 1%;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+    background-color: #ff4500;
+    /* A fire-red color */
+    color: white;
+}
+
+.btn:hover {
+    background-color: #FF6347;
+    /* A slightly lighter red for hover */
+}
+
+.downloads-section {
+    padding-bottom: 2%;
+    padding: 10px;
+    display: grid;
+}
+
+.options {
+    margin: 2% auto;
+    /* width: fit-content; */
+    /* padding: auto;
+    /* border-color: #5B42F3; */
+    border-color: #FF6347; 
+}
+
+.file-downloader .input-section {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.file-downloader .input-group {
+    flex: 1;
+    padding-top: 4%;
+	padding-bottom: 4%
+    /* Adjust as needed */
+}
+
+.downloads-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    /* Some spacing for visual clarity */
+}
+
+.downloads-table th,
+.downloads-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.downloads-table th {
+    border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+    background-color: #ff4500;
+}
