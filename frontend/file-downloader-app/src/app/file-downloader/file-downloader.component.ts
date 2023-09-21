@@ -16,12 +16,30 @@ export class FileDownloaderComponent
   insecureUrlWarning = false;
   public showSpinner: boolean = false;
   public downloadProgress: number = -1;
+  public filenameIsUnique: boolean = false;
+  public filenameErrorMessage: string = '';
 
   constructor(private fileDownloaderService: FileDownloaderService) { }
 
   ngOnInit(): void {
     this.fetchAllDownloads();
   }
+
+  checkFilenameUniqueness(): void {
+    this.fileDownloaderService.isFilenameUnique(this.filename)
+      .subscribe(response => {
+        if (response.isUnique) {
+          this.filenameIsUnique = true;
+          this.filenameErrorMessage = '';
+        } else {
+          this.filenameIsUnique = false;
+          this.filenameErrorMessage = 'Filename is not unique!';
+        }
+      }, error => {
+        console.error("Error checking filename uniqueness:", error);
+      });
+  }
+
 
   downloadFile(): void {
     this.downloadProgress = 0;
@@ -66,8 +84,8 @@ export class FileDownloaderComponent
       });
   }
 
-  fetchDownload(id: string): void {
-    this.fileDownloaderService.getSingleDownload(id)
+  fetchDownload(filename: string): void {
+    this.fileDownloaderService.getSingleDownload(filename)
       .subscribe(response => {
         console.log(response);
       }, error => {
@@ -75,8 +93,8 @@ export class FileDownloaderComponent
       });
   }
 
-  deleteDownload(id: string): void {
-    this.fileDownloaderService.deleteDownload(id)
+  deleteDownload(filename: string): void {
+    this.fileDownloaderService.deleteDownload(filename)
       .subscribe(response => {
         console.log(response.message);
         this.fetchAllDownloads(); // Refresh the list after deletion

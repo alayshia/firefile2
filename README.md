@@ -36,6 +36,13 @@ The backend has been fully tested and the frontend, I have begun testing but nee
 
 ### Release 2
 
+As of feature release 2, the following tasks/features have been implemented:
+
+- Added Progress Bar Component with % and color indicator
+- Checks if file exists prior to downloading
+- Fixed issues deleting filenames
+- Modified the unique identifier to be the filename
+
 ### Release 3
 
 ## Testing

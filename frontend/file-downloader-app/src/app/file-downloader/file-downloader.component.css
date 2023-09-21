@@ -53,7 +53,7 @@
 
 .options {
     margin: 2% auto;
-    border-color:rgb(212, 32, 32);
+    border-color: rgb(212, 32, 32);
 }
 
 .file-downloader .input-section {
@@ -88,4 +88,8 @@
 
 tr:hover {
     background-color: #efe70b;
+}
+
+.error-message {
+    color: red;
 }

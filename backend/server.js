@@ -28,7 +28,7 @@ app.use(cors(corsOptions));
 require('./utils/database-connection.js');
 
 const FileSchema = new mongoose.Schema({
-  name: String,
+  name: { type: String, unique: true },
   url: String,
   content: Buffer,
 });
@@ -98,6 +98,14 @@ app.post('/download', validateDownloadInput, async (req, res) => {
   //setting received bytes to 0
   let receivedBytes = 0;
 
+  //Checks if filename already exists in the Database of local directory
+  const fileInMongo = await File.findOne({ name: filename });
+  const fileInLocal = fs.existsSync(path.join(destination, filename));
+
+  if (fileInMongo || fileInLocal) {
+    return res.status(409).json({ error: 'Filename already exists. Use a different filename.' });
+  }
+
   try {
     const response = await axios.get(url, { responseType: 'stream' });
 
@@ -107,8 +115,8 @@ app.post('/download', validateDownloadInput, async (req, res) => {
     response.data.on('data', (chunk) => {
       receivedBytes += chunk.length;
       downloadProgress[filename] = {
-        receivedBytes: receivedBytes,
-        totalBytes: totalBytes,
+        receivedBytes,
+        totalBytes,
         percentage: ((receivedBytes / totalBytes) * 100).toFixed(2)
       };
     });
@@ -116,7 +124,7 @@ app.post('/download', validateDownloadInput, async (req, res) => {
     if (storeInMongo) {
       const file = new File({
         name: filename,
-        url: url,
+        url,
         content: await streamToBuffer(response.data)
       });
 
@@ -145,7 +153,7 @@ app.post('/download', validateDownloadInput, async (req, res) => {
       });
 
       writer.on('error', (err) => {
-        res.status(500).json({ error: 'Failed to save file locally: ' + err.message });
+        res.status(500).json({ error: `Failed to save file locally: ${err.message}` });
       });
     }
   } catch (error) {
@@ -166,13 +174,17 @@ app.post('/download', validateDownloadInput, async (req, res) => {
   }
 });
 
-app.get('/download-progress/:filename', (req, res) => {
-  const progress = downloadProgress[req.params.filename];
-  if (!progress) {
-    return res.status(404).json({ error: 'Progress not found for given filename.' });
-  }
-  res.json(progress);
-})
+app.get('/unique-file/:filename', async (req, res) => {
+  const { filename } = req.params;
+
+  // Check MongoDB
+  const fileInMongo = await File.findOne({ name: filename });
+
+  // Check local storage
+  const fileInLocal = fs.existsSync(path.join(localSaveDirectory, filename));
+
+  return fileInMongo || fileInLocal ? res.json({ isUnique: false }) : res.json({ isUnique: true });
+});
 
 // Endpoint to fetch all the downloads, no matter the location. Defaults to looking at /tmp
 app.get('/downloads', async (req, res) => {
@@ -212,24 +224,23 @@ app.get('/downloads', async (req, res) => {
 });
 
 // Endpoint to fetch a single download by its MongoDB ID or filename
-app.get('/download/:id', async (req, res) => {
-  const identifier = req.params.id;
+app.get('/download/:filename', async (req, res) => {
+  const { filename } = req.params;
   try {
-    // First, attempt to retrieve from MongoDB by ID
-    const file = await File.findById(identifier);
-    if (!file) {
+    // First, attempt to retrieve from MongoDB by filename
+    const file = await File.findOne({ name: filename });
 
-      res.status(404).json({ error: `File not found in MongoDB.` });
+    if (file) {
+      res.set('Content-Type', 'application/octet-stream');
+      res.send({
+        filename: file.filename,
+        content: file.content, // This sends the raw content, you might want to adjust based on your requirements
+        source: 'MongoDB'
+      });
       return;
     }
-    res.set('Content-Type', 'application/octet-stream');
-    res.send({
-      filename: file.name,
-      content: file.content, // This sends the raw content, you might want to adjust based on your requirements
-      source: 'MongoDB'
-    });
     // If not found in MongoDB, attempt to fetch from local storage by filename
-    const localFilePath = path.join(localSaveDirectory, identifier);
+    const localFilePath = path.join(localSaveDirectory, filename);
 
     if (fs.existsSync(localFilePath)) {
       res.sendFile(localFilePath); // Send the actual file
@@ -244,36 +255,35 @@ app.get('/download/:id', async (req, res) => {
   }
 });
 
-// Endpoint to delete a single download by its MongoDB ID or filename
-app.delete('/download/:id', async (req, res) => {
-  const identifier = req.params.id;
+// Endpoint to delete a single download by its filename. It checks both Mongo and local
+app.delete('/download/:filename', async (req, res) => {
+  const { filename } = req.params;
   try {
-    // First, attempt to delete from MongoDB by ID
-    const file = await File.findById(identifier);
+    // First, attempt to delete from MongoDB by filename
+    const deleteResult = await File.deleteOne({ name: filename });
 
-    if (file) {
-      await File.findByIdAndDelete(identifier);
-      res.send({ message: 'File deleted from MongoDB.' });
-      return;
+    // If file was found and deleted in MongoDB
+    if (deleteResult.deletedCount > 0) {
+      return res.send({ message: 'File deleted from MongoDB.' });
     }
 
     // If not found in MongoDB, attempt to delete from local storage by filename
-    const localFilePath = path.join(localSaveDirectory, identifier);
+    const localFilePath = path.join(localSaveDirectory, filename);
 
-    if (fs.existsSync(localFilePath)) {
+    // Check if the file exists and if it is really a file (not a directory)
+    if (fs.existsSync(localFilePath) && fs.statSync(localFilePath).isFile()) {
       fs.unlinkSync(localFilePath);
-      res.send({ message: 'File deleted from local storage.' });
-      return;
+      return res.send({ message: 'File deleted from local storage.' });
     }
 
     // If not found in both places
     res.status(404).json({ error: 'Download not found.' });
 
   } catch (error) {
+    console.error('Delete Error:', error);
     res.status(500).json({ error: 'Failed to delete the download.' });
   }
 });
-
 
 app.use((err, req, res, next) => {
   console.error('Unhandled Error:', err.message);

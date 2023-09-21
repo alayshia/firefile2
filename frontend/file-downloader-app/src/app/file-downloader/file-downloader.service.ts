@@ -12,6 +12,11 @@ export class FileDownloaderService {
   public downloadProgressSubject: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   constructor(private http: HttpClient) { }
 
+  // Check if the filename is unique
+  isFilenameUnique(filename: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/unique-file/${filename}`);
+  }
+
   // Download a file and save either locally or in MongoDB
   downloadFile(url: string, storeInMongo: boolean, filename: string, destination: string): Observable<any> {
     const body = {
@@ -60,13 +65,13 @@ export class FileDownloaderService {
     return this.http.get(`${this.baseUrl}/downloads`);
   }
 
-  // Fetch a specific download by ID from MongoDB
-  getSingleDownload(id: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/download/${id}`);
+  // Fetch a specific download by filename from MongoDB
+  getSingleDownload(filename: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/download/${filename}`);
   }
 
-  // Delete a specific download by ID from MongoDB
-  deleteDownload(id: string): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/download/${id}`);
+  // Delete a specific download by filename from MongoDB
+  deleteDownload(filename: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/download/${filename}`);
   }
 }

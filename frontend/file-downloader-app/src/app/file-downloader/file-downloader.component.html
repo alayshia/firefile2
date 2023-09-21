@@ -7,7 +7,8 @@
 
     <div class="input-group">
       <label for="filename">Filename: </label>
-      <input type="text" id="filename" [(ngModel)]="filename" placeholder="Enter the filename">
+      <input type="text" id="filename" [(ngModel)]="filename" placeholder="Enter the filename" (input)="checkFilenameUniqueness()">
+      <span class="error-message" *ngIf="!filenameIsUnique">{{ filenameErrorMessage }}</span>
     </div>
 
     <div class="input-group">
@@ -30,9 +31,9 @@
     <button (click)="confirmProceedWithInsecureUrl()" class="btn confirm-btn">Proceed Anyway</button>
   </div>
 
-  <div class="actions">
-    <button (click)="downloadFile()" class="btn download-btn">Download</button>
-  </div>
+<div class="actions">
+  <button [disabled]="!filenameIsUnique" (click)="downloadFile()" class="btn download-btn">Download</button>
+</div>
 
   <div>
     <app-progress-bar [downloadProgress]="downloadProgress">
@@ -58,8 +59,8 @@
           <td>{{ download.size}} bytes</td>
           <td>{{ download.source}}</td>
           <td>
-            <button (click)="fetchDownload(download.id)" class="btn">Fetch</button>
-            <button (click)="deleteDownload(download.id)" class="btn">Delete</button>
+            <button (click)="fetchDownload(download.filename)" class="btn">Fetch</button>
+            <button (click)="deleteDownload(download.filename)" class="btn">Delete</button>
           </td>
         </tr>
       </tbody>
