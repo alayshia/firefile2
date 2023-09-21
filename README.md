@@ -8,9 +8,9 @@ The Firefile Download Manager will be able to do the following features:
 - [X] Delete the file depending on location
 - [X] Tests for unsecure files prior to downloading
 - [X] Dynamically display all downloads, no matter the location
-- [ ] A Progress Bar to understand the download's duration
-- [ ] Generate a shareable link or QR Code if asked
-- [ ] e2e Testing
+- [X] A Progress Bar to understand the download's duration
+- [X] Generate a shareable link or QR Code if asked
+- [X] e2e Testing
 
 ## **Releases**
 
@@ -42,6 +42,7 @@ As of feature release 2, the following tasks/features have been implemented:
 - Checks if file exists prior to downloading
 - Fixed issues deleting filenames
 - Modified the unique identifier to be the filename
+- Created a QR Code
 
 ### Release 3
 

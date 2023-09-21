@@ -2,12 +2,13 @@
   <div class="input-section">
     <div class="input-group">
       <label for="url">Download URL: </label>
-      <input type="url" id="url" [(ngModel)]="url" placeholder="Enter URL" (input)="checkUrlSecurity()">
+      <input type="url" required id="url" [(ngModel)]="url" placeholder="Enter URL" (input)="checkUrlSecurity()">
     </div>
 
     <div class="input-group">
       <label for="filename">Filename: </label>
-      <input type="text" id="filename" [(ngModel)]="filename" placeholder="Enter the filename" (input)="checkFilenameUniqueness()">
+      <input type="text" required id="filename" [(ngModel)]="filename" placeholder="Enter the filename"
+        (input)="checkFilenameUniqueness()">
       <span class="error-message" *ngIf="!filenameIsUnique">{{ filenameErrorMessage }}</span>
     </div>
 
@@ -19,7 +20,7 @@
   </div>
 
   <fieldset class="options">
-    <legend>Fire Mode Options</legend>
+    <legend>Download Storage Options</legend>
     <div class="fieldgroup">
       <input type="checkbox" id="storeInMongo" [(ngModel)]="storeInMongo">
       <label for="storeInMongo">Save to MongoDB</label>
@@ -31,9 +32,9 @@
     <button (click)="confirmProceedWithInsecureUrl()" class="btn confirm-btn">Proceed Anyway</button>
   </div>
 
-<div class="actions">
-  <button [disabled]="!filenameIsUnique" (click)="downloadFile()" class="btn download-btn">Download</button>
-</div>
+  <div class="actions">
+    <button [disabled]="!filenameIsUnique" (click)="downloadFile()" class="btn download-btn">Download</button>
+  </div>
 
   <div>
     <app-progress-bar [downloadProgress]="downloadProgress">
@@ -56,16 +57,20 @@
       <tbody>
         <tr *ngFor="let download of downloads">
           <td>{{ download.filename }}</td>
-          <td>{{ download.size}} bytes</td>
-          <td>{{ download.source}}</td>
+          <td>{{ download.size }} bytes</td>
+          <td>{{ download.source }}</td>
           <td>
-            <button (click)="fetchDownload(download.filename)" class="btn">Fetch</button>
+            <button (click)="showQRCode(download.url)" class="btn">QRCode</button>
+            <div *ngIf="currentDownloadURL">
+              <div *ngIf="revealQRCode">
+                <app-qr-code-generator [urlToShare]="currentDownloadURL">
+                </app-qr-code-generator>
+              </div>
+            </div>
             <button (click)="deleteDownload(download.filename)" class="btn">Delete</button>
           </td>
         </tr>
       </tbody>
     </table>
-
   </div>
-
 </div>
