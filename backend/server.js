@@ -6,6 +6,7 @@ const fs = require('fs');
 const cors = require('cors');
 const path = require('path'); // handles local path resolve
 const localSaveDirectory = '/tmp';
+const downloadProgress = {}; // creates in in-memory store to hold progress data
 
 const app = express();
 
@@ -28,6 +29,7 @@ require('./utils/database-connection.js');
 
 const FileSchema = new mongoose.Schema({
   name: String,
+  url: String,
   content: Buffer,
 });
 
@@ -93,12 +95,28 @@ Downloads the file based on data storage. It can be locally or in the MongoDB da
 app.post('/download', validateDownloadInput, async (req, res) => {
   const { url, storeInMongo, destination, filename } = req.body;
 
+  //setting received bytes to 0
+  let receivedBytes = 0;
+
   try {
     const response = await axios.get(url, { responseType: 'stream' });
+
+    const totalBytes = parseInt(response.headers['content-length'], 10);
+    downloadProgress[filename] = { receivedBytes, totalBytes };
+
+    response.data.on('data', (chunk) => {
+      receivedBytes += chunk.length;
+      downloadProgress[filename] = {
+        receivedBytes: receivedBytes,
+        totalBytes: totalBytes,
+        percentage: ((receivedBytes / totalBytes) * 100).toFixed(2)
+      };
+    });
 
     if (storeInMongo) {
       const file = new File({
         name: filename,
+        url: url,
         content: await streamToBuffer(response.data)
       });
 
@@ -148,6 +166,14 @@ app.post('/download', validateDownloadInput, async (req, res) => {
   }
 });
 
+app.get('/download-progress/:filename', (req, res) => {
+  const progress = downloadProgress[req.params.filename];
+  if (!progress) {
+    return res.status(404).json({ error: 'Progress not found for given filename.' });
+  }
+  res.json(progress);
+})
+
 // Endpoint to fetch all the downloads, no matter the location. Defaults to looking at /tmp
 app.get('/downloads', async (req, res) => {
   try {
@@ -156,6 +182,7 @@ app.get('/downloads', async (req, res) => {
 
     const dbFilesDetails = filesFromDB.map(file => ({
       filename: file.name,
+      url: file.url,
       id: file._id,
       size: Buffer.from(file.content).length,
       source: 'MongoDB'
@@ -168,6 +195,7 @@ app.get('/downloads', async (req, res) => {
 
     const localFilesDetails = localFiles.map(file => ({
       filename: file,
+      url: file.url,
       size: fs.statSync(path.join(localSaveDirectory, file)).size,
       source: 'Local'
     }));
@@ -185,7 +213,7 @@ app.get('/downloads', async (req, res) => {
 
 // Endpoint to fetch a single download by its MongoDB ID or filename
 app.get('/download/:id', async (req, res) => {
-  const { identifier } = req.params.id;
+  const identifier = req.params.id;
   try {
     // First, attempt to retrieve from MongoDB by ID
     const file = await File.findById(identifier);
@@ -218,7 +246,7 @@ app.get('/download/:id', async (req, res) => {
 
 // Endpoint to delete a single download by its MongoDB ID or filename
 app.delete('/download/:id', async (req, res) => {
-  const { identifier } = req.params.id;
+  const identifier = req.params.id;
   try {
     // First, attempt to delete from MongoDB by ID
     const file = await File.findById(identifier);

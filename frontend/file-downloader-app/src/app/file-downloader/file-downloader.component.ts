@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FileDownloaderService } from './file-downloader.service'; // adjust the path based on your directory structure
-
+import { FileDownloaderService } from './file-downloader.service';
 @Component({
   selector: 'app-file-downloader',
   templateUrl: './file-downloader.component.html',
   styleUrls: ['./file-downloader.component.css']
 })
-export class FileDownloaderComponent implements OnInit {
+export class FileDownloaderComponent
+  implements OnInit {
 
   public downloads: any[] = [];
   public url: string = '';
@@ -14,9 +14,32 @@ export class FileDownloaderComponent implements OnInit {
   public storeInMongo: boolean = true;
   public destination: string = '';
   insecureUrlWarning = false;
+  public showSpinner: boolean = false;
+  public downloadProgress: number = -1;
 
   constructor(private fileDownloaderService: FileDownloaderService) { }
 
+  ngOnInit(): void {
+    this.fetchAllDownloads();
+  }
+
+  downloadFile(): void {
+    this.downloadProgress = 0;
+    this.fileDownloaderService.downloadFile(this.url, this.storeInMongo, this.filename, this.destination)
+      .subscribe(progress => {
+        this.downloadProgress = progress;
+        console.log("FileDownloaderComponentProgress:", this.downloadProgress);
+        if (progress === 100) {
+          setTimeout(() => {
+            this.downloadProgress = 0;
+          }, 2000);
+          this.fetchAllDownloads();
+        }
+      }, error => {
+        console.error("Error downloading file:", error);
+        this.downloadProgress = 0;
+      });
+  }
 
   checkUrlSecurity() {
     // Check if the URL starts with 'http://'
@@ -26,30 +49,18 @@ export class FileDownloaderComponent implements OnInit {
       this.insecureUrlWarning = false;
     }
   }
-  
+
   confirmProceedWithInsecureUrl() {
     // Proceed with the entered URL despite the warning
     this.insecureUrlWarning = false;
   }
 
-  ngOnInit(): void {
-    this.fetchAllDownloads();
-  }
-
-  downloadFile(): void {
-    this.fileDownloaderService.downloadFile(this.url, this.storeInMongo, this.filename, this.destination)
-      .subscribe(response => {
-        console.log(response.message);
-        this.fetchAllDownloads(); // Refresh the list after download
-      }, error => {
-        console.error("Error downloading file:", error);
-      });
-  }
 
   fetchAllDownloads(): void {
     this.fileDownloaderService.getAllDownloads()
       .subscribe(response => {
         this.downloads = response.files;
+        console.log(this.downloads);
       }, error => {
         console.error("Error fetching downloads:", error);
       });
@@ -59,7 +70,6 @@ export class FileDownloaderComponent implements OnInit {
     this.fileDownloaderService.getSingleDownload(id)
       .subscribe(response => {
         console.log(response);
-        // Handle the fetched file, maybe display in a modal or another component
       }, error => {
         console.error("Error fetching single download:", error);
       });

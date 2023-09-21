@@ -1,21 +1,22 @@
 <div class="file-downloader">
   <div class="input-section">
-  <div class="input-group">
-    <label for="url">Download URL:</label>
-    <input type="url" id="url" [(ngModel)]="url" placeholder="Enter the file URL" (input)="checkUrlSecurity()">
+    <div class="input-group">
+      <label for="url">Download URL: </label>
+      <input type="url" id="url" [(ngModel)]="url" placeholder="Enter URL" (input)="checkUrlSecurity()">
+    </div>
+
+    <div class="input-group">
+      <label for="filename">Filename: </label>
+      <input type="text" id="filename" [(ngModel)]="filename" placeholder="Enter the filename">
+    </div>
+
+    <div class="input-group">
+      <label for="destination">Destination: </label>
+      <input type="text" id="destination" [(ngModel)]="destination" placeholder="Enter the destination path"
+        [disabled]="storeInMongo">
+    </div>
   </div>
 
-  <div class="input-group">
-    <label for="filename">Filename:</label>
-    <input type="text" id="filename" [(ngModel)]="filename" placeholder="Enter the filename">
-  </div>
-
-  <div class="input-group">
-    <label for="destination">Destination:</label>
-    <input type="text" id="destination" [(ngModel)]="destination" placeholder="Enter the destination path"
-      [disabled]="storeInMongo">
-  </div>
-</div>
   <fieldset class="options">
     <legend>Fire Mode Options</legend>
     <div class="fieldgroup">
@@ -33,31 +34,36 @@
     <button (click)="downloadFile()" class="btn download-btn">Download</button>
   </div>
 
+  <div>
+    <app-progress-bar [downloadProgress]="downloadProgress">
+    </app-progress-bar>
+  </div>
+
   <!-- This section lists all downloads. -->
   <div class="downloads-table">
     <h2>Downloads</h2>
-  <!-- Downloads Table -->
-  <table class="downloads-table">
-    <thead>
-      <tr>
-        <th>Download URL</th>
-        <th>Filename</th>
-        <th>Destination</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let download of downloads">
-        <td>{{ download.filename }}</td>
-        <td>{{ download.size}} bytes</td>
-        <td>Source {{ download.source}}</td>
-        <td>
-          <button (click)="fetchDownload(download.id)" class="btn">Fetch</button>
-          <button (click)="deleteDownload(download.id)" class="btn">Delete</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <!-- Downloads Table -->
+    <table class="downloads-table">
+      <thead>
+        <tr>
+          <th>Filename</th>
+          <th>Size</th>
+          <th>Location</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let download of downloads">
+          <td>{{ download.filename }}</td>
+          <td>{{ download.size}} bytes</td>
+          <td>{{ download.source}}</td>
+          <td>
+            <button (click)="fetchDownload(download.id)" class="btn">Fetch</button>
+            <button (click)="deleteDownload(download.id)" class="btn">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
   </div>
 
