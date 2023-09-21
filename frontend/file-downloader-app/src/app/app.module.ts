@@ -1,20 +1,23 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
 import { AppComponent } from './app.component';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { FileDownloaderComponent } from './file-downloader/file-downloader.component'
+import { FileDownloaderComponent } from './file-downloader/file-downloader.component';
+import { ProgressBarComponent } from './progress-bar/progress-bar.component'
+
 
 @NgModule({
   declarations: [
     AppComponent,
-    FileDownloaderComponent
+    FileDownloaderComponent,
+    ProgressBarComponent
   ],
   imports: [
-    BrowserModule, 
+    BrowserModule,
     FormsModule,
     HttpClientModule,
+
   ],
   providers: [],
   bootstrap: [AppComponent]
