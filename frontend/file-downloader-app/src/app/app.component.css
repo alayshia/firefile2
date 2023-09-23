@@ -30,12 +30,8 @@ header h1 {
    */
 
 footer {
-  position: absolute;
-  bottom: 0px;
-  width: 100%;
-
-  margin-top: -45%;
-
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  flex-shrink: 0;
 }
 
 footer p {

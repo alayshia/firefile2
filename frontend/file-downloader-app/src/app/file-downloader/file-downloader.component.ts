@@ -18,11 +18,19 @@ export class FileDownloaderComponent
   public downloadProgress: number = -1;
   public filenameIsUnique: boolean = false;
   public filenameErrorMessage: string = '';
+  public currentDownloadURL: string | null = null;
+  public revealQRCode: boolean = false;
 
   constructor(private fileDownloaderService: FileDownloaderService) { }
 
   ngOnInit(): void {
     this.fetchAllDownloads();
+  }
+
+
+  showQRCode(url: string): void {
+    this.currentDownloadURL = url;
+    this.revealQRCode = !this.revealQRCode;
   }
 
   checkFilenameUniqueness(): void {

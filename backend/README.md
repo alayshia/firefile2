@@ -26,4 +26,5 @@ curl localhost:3000/downloads | jq .
 ## Things to download
 
 - [Stapler](https://cdn.pixabay.com/photo/2012/04/01/17/25/stapler-23635__340.png)
+- [eraser](https://static.freeimages.com/assets/icons/download.svg)
 - [100K-file](http://speedtest.ftp.otenet.gr/files/test100k.db)

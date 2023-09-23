@@ -54,6 +54,8 @@
 .options {
     margin: 2% auto;
     border-color: rgb(212, 32, 32);
+    justify-content: center;
+    text-align: center;
 }
 
 .file-downloader .input-section {
