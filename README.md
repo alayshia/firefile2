@@ -1,6 +1,8 @@
 # **Firefile Download Manager**
 
-A Download Manager using Angular and a MongoDB Backend.
+A Download Manager.
+
+## Features
 
 The Firefile Download Manager will be able to do the following features:
 
